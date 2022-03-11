@@ -7,5 +7,5 @@ import javax.persistence.Id;
 public class BoardEntity {
     @Id
     private long id;
-
+    private String name;
 }

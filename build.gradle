@@ -24,9 +24,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'com.querydsl:querydsl-jpa' // queryDSL 2) 라이브러리 dependency 추가
     implementation 'com.sun.mail:javax.mail:1.6.2'
-    /*
-    implementation 'javax.mail:javax.mail-api:1.6.2' // https://mvnrepository.com/artifact/javax.mail/javax.mail-api
-     */
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
     annotationProcessor 'org.projectlombok:lombok'
@@ -37,7 +34,7 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-def querydslDir = "$buildDir/generated/querydsl" // queryDSL 3) queryDSL 사용 경로 선언, QClass 생성 위치
+def querydslDir = '$buildDir/generated/querydsl' // queryDSL 3) queryDSL 사용 경로 선언, QClass 생성 위치
 querydsl { // queryDSL 4) querydsl 설정 추가 jpa 사용 여부, 사용 경로 설정
     library = 'com.querydsl:querydsl-apt' // Querydsl annotation processor library에 대응하는 artifact, 
                                           // 현재 spring data 프로젝트가 지원하는 버전만 사용 가능
