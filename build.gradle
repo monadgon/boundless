@@ -1,0 +1,67 @@
+plugins {
+    id 'org.springframework.boot' version '2.6.4'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'com.ewerk.gradle.plugins.querydsl' version '1.0.10' // queryDSL 1) querydsl plugin 추가
+    id 'java'
+}
+
+group = 'com.starseed'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'com.querydsl:querydsl-jpa' // queryDSL 2) 라이브러리 dependency 추가
+    implementation 'com.sun.mail:javax.mail:1.6.2'
+    /*
+    implementation 'javax.mail:javax.mail-api:1.6.2' // https://mvnrepository.com/artifact/javax.mail/javax.mail-api
+     */
+    compileOnly 'org.projectlombok:lombok'
+    runtimeOnly 'com.h2database:h2'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+def querydslDir = "$buildDir/generated/querydsl" // queryDSL 3) queryDSL 사용 경로 선언, QClass 생성 위치
+querydsl { // queryDSL 4) querydsl 설정 추가 jpa 사용 여부, 사용 경로 설정
+    library = 'com.querydsl:querydsl-apt' // Querydsl annotation processor library에 대응하는 artifact, 
+                                          // 현재 spring data 프로젝트가 지원하는 버전만 사용 가능
+                                          // 기본값이 com.querydsl:querydsl-apt이므로 명기하지 않아도 되나, 해당 디펜던시가 사용됨을 표시
+    jpa = true // true일 경우, com.querydsl.apt.jpa.JPAAnnotationProcessor가 추가되면서 프로젝트에 사용된다.
+               // JPAAnnotationProcessor는 meta model(QClass)를 생성한다.
+               // false일 경우, build 타임에 QClass를 생성하지 않는다.
+    querydslSourcesDir = querydslDir //어디에 QClass를 생성할 지 설정, 기본값은 src/querydsl/java이다.
+}
+sourceSets{ // queryDSL 5) build 시 사용할 sourceSet 추가
+    main.java.srcDir querydslDir  // QClass가 생성된 위치, querydslSourceDir과 같은 위치로 한다.
+                                  // java 소스와 리소스 위치를 표현
+}
+/** clean 태스크 실행시 QClass 삭제 */
+clean {
+    delete querydslDir
+}
+
+/* gradle 5.x 설정*/
+configurations {  // querydsl이 compileClassPath를 상속하도록 설정, querydsl의 컴파일된 classpath 경로 지정
+    querydsl.extendsFrom compileClasspath
+}
+compileQuerydsl { // querydsl 컴파일 시 사용할 옵션을 설정
+    options.annotationProcessorPath = configurations.querydsl // querydsl-apt의 annotationProcessor 경로 지정
+                                                              // gradle 5 버전에서는 자체 annotation processor 사용
+                                                              // querydsl-apt의 annotation processor와 충돌
+}
